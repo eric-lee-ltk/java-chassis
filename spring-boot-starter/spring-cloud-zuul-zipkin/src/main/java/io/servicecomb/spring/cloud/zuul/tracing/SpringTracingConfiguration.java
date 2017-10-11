@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 
@@ -38,8 +39,9 @@ import brave.http.HttpClientHandler;
 import brave.http.HttpTracing;
 import brave.servlet.TracingFilter;
 
+@Conditional(value=EnableTracingCondition.class)
 @Configuration
-public class SpringTracingConfiguration {
+class SpringTracingConfiguration {
 
   @Bean
   FilterRegistrationBean traceWebFilter(HttpTracing httpTracing) {
