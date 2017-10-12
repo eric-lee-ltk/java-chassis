@@ -19,32 +19,54 @@ package io.servicecomb.spring.cloud.zuul.tracing;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
+import io.servicecomb.provider.springmvc.reference.RestTemplateBuilder;
 import io.servicecomb.tests.tracing.TracingTestBase;
 
-@DirtiesContext
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = TracedZuulMain.class, webEnvironment = RANDOM_PORT)
 public class SpringCloudZuulTracingTest extends TracingTestBase {
 
-  @Autowired
-  private TestRestTemplate testRestTemplate;
+  private static ConfigurableApplicationContext context;
+
+  private final static RestTemplate restTemplate = RestTemplateBuilder.create();
+
+  private final static String GATEWAY_ADDRESS = "http://127.0.0.1:8081";
+
+  @BeforeClass
+  public static void init() {
+    context = SpringApplication.run(TracedZuulMain.class);
+    restTemplate.setErrorHandler(new ResponseErrorHandler() {
+      @Override
+      public boolean hasError(ClientHttpResponse clientHttpResponse) throws IOException {
+        return false;
+      }
+
+      @Override
+      public void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
+      }
+    });
+  }
+
+  @AfterClass
+  public static void shutdown() {
+    context.close();
+  }
 
   @After
   public void tearDown() throws Exception {
@@ -53,7 +75,7 @@ public class SpringCloudZuulTracingTest extends TracingTestBase {
 
   @Test
   public void tracesCallsReceivedFromZuulToCalledService() throws InterruptedException {
-    ResponseEntity<String> responseEntity = testRestTemplate.getForEntity("/dummy/rest/blah", String.class);
+    ResponseEntity<String> responseEntity = restTemplate.getForEntity(GATEWAY_ADDRESS + "/dummy/rest/blah", String.class);
 
     assertThat(responseEntity.getStatusCode(), is(OK));
     assertThat(responseEntity.getBody(), is("blah"));
@@ -68,7 +90,7 @@ public class SpringCloudZuulTracingTest extends TracingTestBase {
 
   @Test
   public void tracesFailedCallsReceivedByZuul() throws InterruptedException {
-    ResponseEntity<String> responseEntity = testRestTemplate.getForEntity("/dummy/rest/oops", String.class);
+    ResponseEntity<String> responseEntity = restTemplate.getForEntity(GATEWAY_ADDRESS + "/dummy/rest/oops", String.class);
 
     assertThat(responseEntity.getStatusCode(), is(INTERNAL_SERVER_ERROR));
 

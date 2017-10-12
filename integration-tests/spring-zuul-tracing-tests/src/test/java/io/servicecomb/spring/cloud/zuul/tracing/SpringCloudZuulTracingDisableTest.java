@@ -18,26 +18,32 @@ package io.servicecomb.spring.cloud.zuul.tracing;
 
 import static io.servicecomb.foundation.common.base.ServiceCombConstants.CONFIG_TRACING_ENABLED_KEY;
 import static org.junit.Assert.fail;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import io.servicecomb.foundation.common.utils.BeanUtils;
+import io.servicecomb.tests.tracing.TracingTestBase;
 
-@DirtiesContext
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = TracedZuulMain.class, webEnvironment = RANDOM_PORT)
+
 public class SpringCloudZuulTracingDisableTest {
+
+  private static ConfigurableApplicationContext context;
 
   @BeforeClass
   public static void init() throws Exception {
+    TracingTestBase.setUpLocalRegistry();
     System.setProperty(CONFIG_TRACING_ENABLED_KEY, "false");
+    context = SpringApplication.run(TracedZuulMain.class);
+  }
+
+  @AfterClass
+  public static void shutdown() throws Exception {
+    context.close();
   }
 
   @Test

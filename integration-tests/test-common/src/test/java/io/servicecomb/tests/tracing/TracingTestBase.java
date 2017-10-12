@@ -61,9 +61,10 @@ public class TracingTestBase {
     Log4jConfig.addAppender(appender);
   }
 
-  private static void setUpLocalRegistry() {
+  public static void setUpLocalRegistry() {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     URL resource = loader.getResource("registry.yaml");
+    assert resource != null;
     System.setProperty(LOCAL_REGISTRY_FILE_KEY, resource.getPath());
   }
 

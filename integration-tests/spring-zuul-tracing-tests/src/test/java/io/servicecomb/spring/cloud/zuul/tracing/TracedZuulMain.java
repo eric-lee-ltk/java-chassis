@@ -16,7 +16,6 @@
 
 package io.servicecomb.spring.cloud.zuul.tracing;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
@@ -25,9 +24,5 @@ import io.servicecomb.springboot.starter.provider.EnableServiceComb;
 @SpringBootApplication
 @EnableZuulProxy
 @EnableServiceComb
-public class TracedZuulMain {
-
-  public static void main(String[] args) {
-    SpringApplication.run(TracedZuulMain.class, args);
-  }
+class TracedZuulMain {
 }
