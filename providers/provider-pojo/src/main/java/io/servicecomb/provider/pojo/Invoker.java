@@ -33,6 +33,7 @@ import io.servicecomb.swagger.engine.SwaggerConsumer;
 import io.servicecomb.swagger.engine.SwaggerConsumerOperation;
 import io.servicecomb.swagger.invocation.Response;
 import io.servicecomb.swagger.invocation.exception.ExceptionFactory;
+import io.servicecomb.swagger.invocation.exception.InvocationException;
 
 public class Invoker implements InvocationHandler {
   // 原始数据
@@ -92,6 +93,10 @@ public class Invoker implements InvocationHandler {
       return consumerOperation.getResponseMapper().mapResponse(response);
     }
 
-    throw ExceptionFactory.convertConsumerException(response.getResult());
+    Object result = response.getResult();
+    if (!Throwable.class.isInstance(result)) {
+      result = new InvocationException(response.getStatus(), result);
+    }
+    throw ExceptionFactory.convertConsumerException((Throwable)result);
   }
 }
