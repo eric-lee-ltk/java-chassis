@@ -16,8 +16,6 @@
 
 package io.servicecomb.bizkeeper;
 
-import static io.servicecomb.swagger.invocation.Response.isValid5xxServerError;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +23,8 @@ import com.netflix.hystrix.HystrixObservableCommand;
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 
 import io.servicecomb.core.Invocation;
+import io.servicecomb.core.definition.OperationMeta;
+import io.servicecomb.core.utils.OperationMetaHelper;
 import io.servicecomb.swagger.invocation.Response;
 import rx.Observable;
 
@@ -81,9 +81,10 @@ public abstract class BizkeeperCommand extends HystrixObservableCommand<Response
           if (isFailedResponse(resp)) {
             // e should implements toString
             LOG.warn("bizkeeper command failed due to:" + resp.getResult());
-            Object result = resp.getResult();
-            // bypass normal http server exception
-            if (isValid5xxServerError(resp.getStatusCode()) && (result instanceof String)) {
+            // bypass custom status code
+            OperationMeta operationMeta = invocation.getOperationMeta();
+            if (operationMeta != null &&
+                OperationMetaHelper.isCustomStatusCode(operationMeta, resp.getStatusCode())) {
               f.onNext(resp);
               f.onCompleted();
             } else {

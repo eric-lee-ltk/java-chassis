@@ -67,7 +67,7 @@ public class CodeFirstJaxrs {
   @Path("/cseResponse")
   @GET
   public Response cseResponse(InvocationContext c1) {
-    Response response = Response.createSuccess(Status.ACCEPTED, new User());
+    Response response = Response.createNormalResponse(Status.ACCEPTED, new User());
     Headers headers = response.getHeaders();
     headers.addHeader("h1", "h1v " + c1.getContext().toString());
 

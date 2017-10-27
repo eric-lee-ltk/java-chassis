@@ -16,8 +16,6 @@
 
 package io.servicecomb.loadbalance;
 
-import static io.servicecomb.swagger.invocation.Response.isValid5xxServerError;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +39,11 @@ import com.netflix.loadbalancer.reactive.LoadBalancerCommand;
 import com.netflix.loadbalancer.reactive.ServerOperation;
 
 import io.servicecomb.core.Invocation;
+import io.servicecomb.core.definition.OperationMeta;
 import io.servicecomb.core.exception.ExceptionUtils;
 import io.servicecomb.core.handler.impl.AbstractHandler;
 import io.servicecomb.core.provider.consumer.SyncResponseExecutor;
+import io.servicecomb.core.utils.OperationMetaHelper;
 import io.servicecomb.loadbalance.filter.IsolationServerListFilter;
 import io.servicecomb.loadbalance.filter.TransactionControlFilter;
 import io.servicecomb.swagger.invocation.AsyncResponse;
@@ -257,7 +257,10 @@ public class LoadbalanceHandler extends AbstractHandler {
             invocation.next(resp -> {
               if (resp.isFailed()) {
                 choosenLB.getLoadBalancerStats().incrementSuccessiveConnectionFailureCount(s);
-                if (isValid5xxServerError(resp.getStatusCode()) && resp.getResult() instanceof String) {
+                // bypass custom status code
+                OperationMeta operationMeta = invocation.getOperationMeta();
+                if (operationMeta != null &&
+                    OperationMetaHelper.isCustomStatusCode(operationMeta, resp.getStatusCode())) {
                   LOGGER.error("service call error, msg is {}, server is {} ",
                       resp.getResult(),
                       s);

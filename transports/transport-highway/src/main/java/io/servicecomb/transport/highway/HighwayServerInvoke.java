@@ -32,6 +32,7 @@ import io.servicecomb.core.definition.MicroserviceMeta;
 import io.servicecomb.core.definition.MicroserviceMetaManager;
 import io.servicecomb.core.definition.OperationMeta;
 import io.servicecomb.core.definition.SchemaMeta;
+import io.servicecomb.core.utils.OperationMetaHelper;
 import io.servicecomb.foundation.vertx.tcp.TcpConnection;
 import io.servicecomb.swagger.invocation.Response;
 import io.servicecomb.swagger.invocation.exception.InvocationException;
@@ -133,7 +134,7 @@ public class HighwayServerInvoke {
 
     WrapSchema bodySchema = operationProtobuf.findResponseSchema(response.getStatusCode());
     Object body = response.getResult();
-    if (response.isFailed()) {
+    if (response.isFailed() && !OperationMetaHelper.isCustomStatusCode(operationMeta, response.getStatusCode())) {
       body = ((InvocationException) body).getErrorData();
     }
 

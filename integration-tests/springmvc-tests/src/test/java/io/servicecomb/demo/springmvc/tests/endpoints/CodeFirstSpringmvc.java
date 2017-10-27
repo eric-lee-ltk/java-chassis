@@ -146,6 +146,7 @@ public class CodeFirstSpringmvc extends CodeFirstSpringmvcBase {
     return super.addString(s);
   }
 
+  @ApiResponse(code = 500, response = String.class, message = "")
   @RequestMapping(value = "/faultyResource", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   @Override
   public ResponseEntity<String> postFaultyResource(@RequestParam(name = "foo") String foo) {

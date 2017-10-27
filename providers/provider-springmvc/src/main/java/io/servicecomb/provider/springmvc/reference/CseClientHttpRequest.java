@@ -16,8 +16,6 @@
 
 package io.servicecomb.provider.springmvc.reference;
 
-import static io.servicecomb.swagger.invocation.Response.isValid5xxServerError;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -39,10 +37,12 @@ import io.servicecomb.common.rest.locator.OperationLocator;
 import io.servicecomb.common.rest.locator.ServicePathManager;
 import io.servicecomb.core.Invocation;
 import io.servicecomb.core.definition.MicroserviceMeta;
+import io.servicecomb.core.definition.OperationMeta;
 import io.servicecomb.core.invocation.InvocationFactory;
 import io.servicecomb.core.provider.consumer.InvokerUtils;
 import io.servicecomb.core.provider.consumer.ReferenceConfig;
 import io.servicecomb.core.provider.consumer.ReferenceConfigUtils;
+import io.servicecomb.core.utils.OperationMetaHelper;
 import io.servicecomb.swagger.invocation.Response;
 import io.servicecomb.swagger.invocation.context.InvocationContext;
 import io.servicecomb.swagger.invocation.exception.ExceptionFactory;
@@ -153,8 +153,9 @@ public class CseClientHttpRequest implements ClientHttpRequest {
     invocation.getHandlerContext().put(RestConst.CONSUMER_HEADER, httpHeaders);
     Response response = doInvoke(invocation);
 
+    OperationMeta operationMeta = invocation.getOperationMeta();
     if (response.isSuccessed() ||
-        (isValid5xxServerError(response.getStatusCode()) && (response.getResult() instanceof String))) {
+        (operationMeta != null && OperationMetaHelper.isCustomStatusCode(operationMeta, response.getStatusCode()))) {
       return new CseClientHttpResponse(response);
     }
 

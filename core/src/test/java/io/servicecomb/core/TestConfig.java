@@ -16,9 +16,6 @@
 
 package io.servicecomb.core;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -129,14 +126,9 @@ public class TestConfig {
     exception = response.getResult();
     Assert.assertEquals("errorData", exception.getErrorData());
 
-    response = Response.create(Status.INTERNAL_SERVER_ERROR, "no such resource");
+    response = Response.createNormalResponse(Status.INTERNAL_SERVER_ERROR, "no such resource");
     String result = response.getResult();
     Assert.assertEquals("no such resource", result);
-
-    assertThat(Response.isValid5xxServerError(200), is(false));
-    assertThat(Response.isValid5xxServerError(490), is(false));
-    assertThat(Response.isValid5xxServerError(502), is(true));
-    assertThat(Response.isValid5xxServerError(590), is(false));
   }
 
   @Test

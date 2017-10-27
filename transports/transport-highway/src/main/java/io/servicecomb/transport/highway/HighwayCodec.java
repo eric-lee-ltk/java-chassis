@@ -16,14 +16,19 @@
 
 package io.servicecomb.transport.highway;
 
+import javax.ws.rs.core.Response.StatusType;
+
 import io.protostuff.runtime.ProtobufFeature;
 import io.servicecomb.codec.protobuf.definition.OperationProtobuf;
 import io.servicecomb.codec.protobuf.utils.WrapSchema;
 import io.servicecomb.core.Invocation;
+import io.servicecomb.core.definition.OperationMeta;
 import io.servicecomb.core.invocation.InvocationFactory;
+import io.servicecomb.core.utils.OperationMetaHelper;
 import io.servicecomb.foundation.vertx.client.tcp.TcpData;
 import io.servicecomb.foundation.vertx.tcp.TcpOutputStream;
 import io.servicecomb.swagger.invocation.Response;
+import io.servicecomb.swagger.invocation.context.HttpStatus;
 import io.servicecomb.transport.highway.message.RequestHeader;
 import io.servicecomb.transport.highway.message.ResponseHeader;
 import io.vertx.core.buffer.Buffer;
@@ -90,7 +95,14 @@ public final class HighwayCodec {
     WrapSchema bodySchema = operationProtobuf.findResponseSchema(header.getStatusCode());
     Object body = bodySchema.readObject(tcpData.getBodyBuffer(), protobufFeature);
 
-    Response response = Response.create(header.getStatusCode(), header.getReasonPhrase(), body);
+    Response response;
+    OperationMeta operationMeta = invocation.getOperationMeta();
+    if (operationMeta != null && OperationMetaHelper.isCustomStatusCode(operationMeta, header.getStatusCode())) {
+      StatusType status = new HttpStatus(header.getStatusCode(), header.getReasonPhrase());
+      response = Response.createNormalResponse(status, body);
+    } else {
+      response = Response.create(header.getStatusCode(), header.getReasonPhrase(), body);
+    }
     response.setHeaders(header.getHeaders());
 
     return response;

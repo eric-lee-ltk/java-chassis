@@ -51,7 +51,7 @@ public class CodeFirstJaxrs extends SomeAbstractJaxrsRestEndpoint {
   @Path("/response")
   @GET
   public Response response(InvocationContext c1) {
-    Response response = Response.createSuccess(Status.ACCEPTED, new User());
+    Response response = Response.createNormalResponse(Status.ACCEPTED, new User());
     Headers headers = response.getHeaders();
     headers.addHeader("h1", "h1v " + c1.getContext().toString());
 

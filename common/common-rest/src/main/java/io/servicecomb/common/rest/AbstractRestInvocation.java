@@ -16,8 +16,6 @@
 
 package io.servicecomb.common.rest;
 
-import static io.servicecomb.swagger.invocation.Response.isValid5xxServerError;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +36,8 @@ import io.servicecomb.common.rest.definition.RestOperationMeta;
 import io.servicecomb.common.rest.filter.HttpServerFilter;
 import io.servicecomb.core.Const;
 import io.servicecomb.core.Invocation;
+import io.servicecomb.core.definition.OperationMeta;
+import io.servicecomb.core.utils.OperationMetaHelper;
 import io.servicecomb.foundation.common.utils.JsonUtils;
 import io.servicecomb.foundation.vertx.http.HttpServletRequestEx;
 import io.servicecomb.foundation.vertx.http.HttpServletResponseEx;
@@ -146,9 +146,10 @@ public abstract class AbstractRestInvocation {
     responseEx.setContentType(produceProcessor.getName());
 
     Object body = response.getResult();
-    // bypass normal http exception
+    // bypass custom status code
+    OperationMeta operationMeta = restOperationMeta.getOperationMeta();
     if (response.isFailed() &&
-        (!(isValid5xxServerError(response.getStatusCode()) && (body instanceof String)))) {
+        !(operationMeta != null && OperationMetaHelper.isCustomStatusCode(operationMeta, response.getStatusCode()))) {
       body = ((InvocationException) body).getErrorData();
     }
 

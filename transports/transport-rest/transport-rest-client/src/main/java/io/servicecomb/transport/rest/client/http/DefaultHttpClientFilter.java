@@ -26,6 +26,7 @@ import io.servicecomb.common.rest.definition.RestOperationMeta;
 import io.servicecomb.common.rest.filter.HttpClientFilter;
 import io.servicecomb.core.Invocation;
 import io.servicecomb.core.definition.OperationMeta;
+import io.servicecomb.core.utils.OperationMetaHelper;
 import io.servicecomb.foundation.vertx.http.HttpServletRequestEx;
 import io.servicecomb.foundation.vertx.http.HttpServletResponseEx;
 import io.servicecomb.swagger.invocation.Response;
@@ -84,8 +85,13 @@ public class DefaultHttpClientFilter implements HttpClientFilter {
       return Response.consumerFailResp(e);
     }
 
-    Response response =
-        Response.create(responseEx.getStatusType(), result);
+    Response response;
+    if (OperationMetaHelper.isCustomStatusCode(operationMeta, responseEx.getStatusType().getStatusCode())) {
+      response = Response.createNormalResponse(responseEx.getStatusType(), result);
+    } else {
+      response =
+          Response.create(responseEx.getStatusType(), result);
+    }
     for (String headerName : responseEx.getHeaderNames()) {
       Collection<String> headerValues = responseEx.getHeaders(headerName);
       for (String headerValue : headerValues) {

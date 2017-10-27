@@ -107,7 +107,7 @@ public class TestResponse {
     Assert.assertEquals("300", r.getReasonPhrase());
     Assert.assertEquals(3, ((InvocationException) r.getResult()).getErrorData());
 
-    r = Response.createSuccess(Status.OK, 2);
+    r = Response.createNormalResponse(Status.OK, 2);
     Assert.assertEquals(200, r.getStatusCode());
     Assert.assertEquals(2, (int) r.getResult());
 

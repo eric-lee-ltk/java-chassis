@@ -16,7 +16,6 @@
 package io.servicecomb.swagger.invocation;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
 import io.servicecomb.swagger.invocation.context.HttpStatus;
@@ -89,15 +88,14 @@ public class Response {
 
   public static Response create(StatusType status, Object result) {
     Response response = Response.status(status);
-    if (response.isFailed() &&
-        (!(isValid5xxServerError(response.getStatusCode()) && (result instanceof String)))) {
+    if (response.isFailed()) {
         result = ExceptionFactory.create(status, result);
     }
     return response.entity(result);
   }
 
-  // 有的场景下，需要返回非200的，其他2xx状态码，所以需要支持指定
-  public static Response createSuccess(StatusType status, Object result) {
+  // 有的场景下，需要返回非200的，所以需要支持指定
+  public static Response createNormalResponse(StatusType status, Object result) {
     return Response.status(status).entity(result);
   }
 
@@ -151,7 +149,7 @@ public class Response {
   }
 
   public static Response success(Object result, StatusType status) {
-    return createSuccess(status, result);
+    return createNormalResponse(status, result);
   }
 
   public static Response succResp(Object result) {
@@ -187,10 +185,5 @@ public class Response {
     response.setStatus(Status.OK);
     response.setResult(result);
     return response;
-  }
-
-  public static boolean isValid5xxServerError(int statusCode) {
-    return Status.fromStatusCode(statusCode) != null &&
-        Family.SERVER_ERROR.equals(Family.familyOf(statusCode));
   }
 }
